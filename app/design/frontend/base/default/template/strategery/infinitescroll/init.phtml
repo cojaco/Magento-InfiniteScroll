@@ -15,6 +15,9 @@
  * @copyright  Copyright (c) 2014 Strategery Inc. (http://usestrategery.com)
  *
  * @author     Enrique Piatti (contacto@enriquepiatti.com)
+ *
+ * @author     Damian A. Pastorini (damian.pastorini@dwdeveloper.com)
+ * @link       http://www.dwdeveloper.com/
  */
 ?>
 <?php if($this->isEnabled()): ?>
@@ -63,7 +66,7 @@
 	}();
 
 	window.SgyIAS = {
-		debug: false,
+		debug: <?php echo $helper->getConfigData('general/debug'); ?>,
 		_log: function(object) {
 			if(this.debug) {
 				console.log(object);
@@ -80,7 +83,7 @@
 							delay: 600,
 							negativeMargin: <?php echo (int) $helper->getConfigData('design/buffer_px') ?>,
 							history: {
-								prev: '.prev'
+								prev: '<?php echo $helper->getConfigData('selectors/previous') ?>'
 							},
 							noneleft: {
 								text: '<?php echo $helper->jsQuoteEscape($this->__($helper->getConfigData('design/done_text'))) ?>',
@@ -97,7 +100,7 @@
 							trigger: {
 								text: '<?php echo $helper->jsQuoteEscape($this->__($helper->getConfigData('design/load_more_text'))) ?>',
 								html: '<div class="ias-trigger ias-trigger-next" style="text-align: center; cursor: pointer;"><a>{text}</a></div>',
-								textPrev: '<?php echo $helper->jsQuoteEscape($this->__($helper->getConfigData('design/load_more_text'))) ?>',
+								textPrev: '<?php echo $helper->jsQuoteEscape($this->__($helper->getConfigData('design/load_more_text_prev'))) ?>',
 								htmlPrev: '<div class="ias-trigger ias-trigger-prev" style="text-align: center; cursor: pointer;"><a>{text}</a></div>',
 								offset: <?php echo (int) $helper->getConfigData('design/load_more_threshold') ?>
 							}
@@ -155,12 +158,30 @@
 
 						$('<?php echo Mage::getStoreConfig('infinitescroll/selectors/toolbar') ?>').<?php echo $helper->getConfigData('design/hide_toolbar') ? 'hide' : 'show' ?>();
 
+						// custom fix for url protocol issue in jquery ias library:
+						window.ias.getNextUrl = function(container) {
+							if (!container) {
+								container = window.ias.$container;
+							}
+							// always take the last matching item + fix to be protocol relative
+							var nexturl = $(window.ias.nextSelector, container).last().attr('href');
+							if(typeof nexturl !== "undefined") {
+								if (window.location.protocol == 'https:') {
+									nexturl = nexturl.replace('http:', window.location.protocol);
+								} else {
+									nexturl = nexturl.replace('https:', window.location.protocol);
+								}
+							}
+							return nexturl;
+						};
+						// custom fix for url protocol issue in jquery ias library.
+
 						if(windowLoadedFlag){
 							$(window).load();
 						}
 
 						SgyIAS._log('Done loading IAS.');
-
+						$(document).trigger( "infiniteScrollReady", [window.ias]);
 					});
 			});
 		}
