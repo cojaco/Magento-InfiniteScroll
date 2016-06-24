@@ -145,6 +145,17 @@
 						});
 						window.ias.on('rendered', function(items){
 							SgyIAS._log({eventName: 'render', items: items});
+
+
+							jQuery(function($) {
+
+								var $el = $('.category-products');
+								var listView = new infinity.ListView($el);
+								var listItems = listView.find('.infinityscrollhelper');
+								console.log(listView);
+								console.log('test');
+							});
+
 						});
 						window.ias.on('noneLeft', function(){
 							SgyIAS._log({eventName: 'noneLeft'});
@@ -190,6 +201,9 @@
 	jQueryWaiter.execute(function(){
 		SgyIAS.init();
 	});
+
+
+
 //]]>
 </script>
 <?php endif ?>
